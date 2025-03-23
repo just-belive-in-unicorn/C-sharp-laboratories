@@ -1,0 +1,58 @@
+﻿<Window x:Class="BirthdayApp.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Birthday App" Height="350" Width="400"
+        Background="{StaticResource MainBackground}">
+
+    <Grid>
+        <StackPanel Margin="20" HorizontalAlignment="Center">
+
+            <TextBlock Text="Enter your birth date:"
+                       FontSize="18"
+                       FontWeight="Bold"
+                       FontFamily="Comic Sans MS"
+                       Margin="0 0 0 7"/>
+
+            <DatePicker SelectedDate="{Binding BirthDate, Mode=TwoWay}" 
+                        FontFamily="Comic Sans MS"
+                        Margin="0 0 0 7"/>
+
+            <Button Content="Calculate" 
+                    Command="{Binding CalculateAgeCommand}" 
+                    FontFamily="Comic Sans MS"
+                    FontWeight="Bold"
+                    Margin="0 0 0 10"/>
+
+            <TextBlock Text="{Binding AgeMessage}"
+                       FontWeight="Bold"
+                       FontSize="18"
+                       FontFamily="Comic Sans MS"
+                       Margin="0 0 0 10">
+                <TextBlock.Triggers>
+                    <EventTrigger RoutedEvent="Loaded">
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                 From="0" To="1" Duration="0:0:1" />
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </TextBlock.Triggers>
+            </TextBlock>
+
+            <TextBlock Text="{Binding ZodiacWestern}" 
+                       Foreground="#D46A91"
+                       FontFamily="Comic Sans MS"
+                       FontWeight="Bold"
+                       FontSize="15"
+                       Margin="0 2 0 2"/>
+
+            <TextBlock Text="{Binding ZodiacChinese}" 
+                       Foreground="#C86A82"
+                       FontFamily="Comic Sans MS"
+                       FontWeight="Bold"
+                       FontSize="15"
+                       Margin="0 2 0 2"/>
+        </StackPanel>
+    </Grid>
+</Window>
