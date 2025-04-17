@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Input;
 using Lab2.Commands;
 using Lab2.Models;
+using Lab2.Exceptions;
 
 namespace Lab2.ViewModels
 {
@@ -63,23 +64,15 @@ namespace Lab2.ViewModels
             ProceedCommand = new RelayCommand(async () => await ProceedAsync(), () => CanProceed && !IsProcessing);
         }
 
-        private async Task ProceedAsync()
+    private async Task ProceedAsync()
+    {
+        IsProcessing = true;
+
+        try
         {
-            IsProcessing = true;
+            ValidateInput();
 
-            if (!DateTime.TryParse(BirthDate, out DateTime birthDateValue))
-            {
-                MessageBox.Show("Invalid birth date format!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                IsProcessing = false;
-                return;
-            }
-
-            if (birthDateValue > DateTime.Now || DateTime.Now.Year - birthDateValue.Year > 135)
-            {
-                MessageBox.Show("Entered birth date is incorrect!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                IsProcessing = false;
-                return;
-            }
+            DateTime birthDateValue = DateTime.Parse(BirthDate);
 
             Person person = await Task.Run(() => new Person(FirstName, LastName, Email, birthDateValue));
 
@@ -92,11 +85,40 @@ namespace Lab2.ViewModels
                             $"Birth Date: {person.BirthDate?.ToShortDateString()}\nAdult: {person.IsAdult}\n" +
                             $"Western Zodiac: {person.SunSign}\nChinese Zodiac: {person.ChineseSign}\nBirthday Today: {person.IsBirthday}",
                             "Results", MessageBoxButton.OK, MessageBoxImage.Information);
-
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Validation Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        finally
+        {
             IsProcessing = false;
         }
+    }
 
-        private bool IsValidEmail(string email)
+    private void ValidateInput()
+    {
+        if (!DateTime.TryParse(BirthDate, out DateTime birthDateValue))
+            throw new FormatException("Невірний формат дати народження.");
+
+        if (birthDateValue > DateTime.Now)
+            throw new FutureBirthDateException();
+
+        if (DateTime.Now.Year - birthDateValue.Year > 135)
+            throw new TooOldBirthDateException();
+
+        if (!IsValidEmail(Email))
+            throw new InvalidEmailException();
+
+        if (Regex.IsMatch(FirstName, @"\d"))
+            throw new NameContainsDigitsException("Ім’я");
+
+        if (Regex.IsMatch(LastName, @"\d"))
+            throw new NameContainsDigitsException("Прізвище");
+    }
+
+
+    private bool IsValidEmail(string email)
         {
             if (string.IsNullOrWhiteSpace(email)) return false;
             string pattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
